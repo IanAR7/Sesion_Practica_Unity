@@ -154,308 +154,88 @@ Arrastrar el archivo al Inspector y hacer clic en los 3 puntos ubicados en la es
 Al crear el archivo con los atributos de clase siendo la posición y los inputs del usuario. Tiene dos funciones: actualizar la posición y la que calcula la posición nueva. 
 
 ```
-
-using System.Collections; 
-
-using UnityEngine; 
-
- 
- 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GridMovement : MonoBehaviour 
-
 { 
 
-    private Vector2 targetPosition; 
+    [SerializeField] private float moveTime = 0.14f;
 
-    private float xInput, yInput; 
+    private Vector2 targetPosition;
+    private float xInput, yInput;
+    private bool isMoving; 
 
- 
- 
+    void Update()
+    {
+        
+        xInput = Input.GetAxisRaw("Horizontal");
+        yInput = Input.GetAxisRaw("Vertical");
 
-    void update() 
-
-    { 
-
-        xInput = Input.GetAxisRaw("Horizontal"); 
-
-        yInput = Input.GetAxisRaw("Vertical"); 
-
- 
- 
-
-        if (xInput != 0f || yInput != 0f) 
-
-        { 
-
-            CalculateTargetPosition(); 
-
+        //to only move the player one square in the  grid like chess
+        if((xInput != 0f || yInput != 0f) && !isMoving && Input.anyKeyDown)
+        {
+            
+            CalculateTargetPosition();
+            if (CanMoveToTargetPosition())
+            {
+                StartCoroutine(Move());
+            }
+            
         } 
+    }
 
-    } 
-
- 
- 
-
-    private void CalculateTargetPosition() 
-
-    { 
-
-        if (xInput == 1f) 
-
-        { 
-
-            targetPosition = (Vector2)transform.position + Vector2.right; 
-
-        } 
-
-        else if (xInput == -1f) 
-
-        { 
-
+    private void CalculateTargetPosition()
+    {
+        if(xInput == 1f)
+        {
+            targetPosition = (Vector2)transform.position + Vector2.right;
+        }
+        else if (xInput == -1f)
+        {
             targetPosition = (Vector2)transform.position + Vector2.left; 
-
-        } 
-
-        else if (yInput == 1f) 
-
-        { 
-
+        }
+        else if (yInput == 1f)
+        {
             targetPosition = (Vector2)transform.position + Vector2.up; 
-
-        } 
-
-        else if (yInput == -1f) 
-
-        { 
-
+        }
+        else if (yInput == -1f)
+        {
             targetPosition = (Vector2)transform.position + Vector2.down; 
+        }
 
-        } 
-
-    } 
+        
+    }
 
 } 
 ```
- 
 
-Se agrega la función: 
+Se agrega la función para mover al jugador: 
 ```
-private void OnDrawGizmos() 
+IEnumerator Move()
+    {
+        isMoving = true;
+        float timeElapsed = 0f;
+        Vector2 startPosition = transform.position;
 
-    { 
-
-        Gizmos.DrawWireSphere(targetPosition, 0.15f); 
-
-    } 
+        while (timeElapsed < moveTime)
+        {
+            //to move the player in the engine
+            transform.position = Vector2.Lerp(startPosition, targetPosition, timeElapsed / moveTime);
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = targetPosition;
+        isMoving = false;
+    }
 ```
- 
 
-Se actualiza: 
+Se agrega la función booleana para confirmar si se quiere mover o no: 
 ```
-
-    void update() 
-
-    { 
-
-        private float moveTime = 0.15f; 
-
- 
- 
-
-        xInput = Input.GetAxisRaw("Horizontal"); 
-
-        yInput = Input.GetAxisRaw("Vertical"); 
-
- 
- 
-
-        if (xInput != 0f || yInput != 0f) 
-
-        { 
-
-            CalculateTargetPosition(); 
-
-            StartCoroutine(Move()); 
-
-        } 
-
-    } 
-
- 
- 
-
-    IEnumerator Move() 
-
-    { 
-
-        float timeElapsed = 0f; 
-
-        Vector2 startPosition = transform.position; 
-
- 
- 
-
-        while(timeElapsed < moveTime) 
-
-        { 
-
-            transform.position = Vector2.Lerp(startPosition, targetPosition, timeElapsed / moveTime); 
-
-            timeElapsed += Time.deltaTime; 
-
-            yield return null; 
-
-        } 
-
- 
- 
-
-        transform.position = targetPosition; 
-
-    } 
-
- ```
- 
-
-Se termina: 
-```
-using System.Collections; 
-
-using UnityEngine; 
-
- 
- 
-
-public class GridMovement : MonoBehaviour 
-
-{ 
-
-    private Vector2 targetPosition; 
-
-    private float xInput, yInput; 
-
- 
- 
-
-    void update() 
-
-    { 
-
-        private float moveTime = 0.15f; 
-
- 
- 
-
-        xInput = Input.GetAxisRaw("Horizontal"); 
-
-        yInput = Input.GetAxisRaw("Vertical"); 
-
-        private bool isMoving; 
-
- 
- 
-
-        if ((xInput != 0f || yInput != 0f) && !isMoving && Input.anyKeyDown) 
-
-        { 
-
-            CalculateTargetPosition(); 
-
-            StartCoroutine(Move()); 
-
-        } 
-
-    } 
-
- 
- 
-
-    IEnumerator Move() 
-
-    { 
-
-        isMoving = true; 
-
-        float timeElapsed = 0f; 
-
-        Vector2 startPosition = transform.position; 
-
- 
- 
-
-        while(timeElapsed < moveTime) 
-
-        { 
-
-            transform.position = Vector2.Lerp(startPosition, targetPosition, timeElapsed / moveTime); 
-
-            timeElapsed += Time.deltaTime; 
-
-            yield return null; 
-
-        } 
-
- 
- 
-
-        transform.position = targetPosition; 
-
-    } 
-
- 
- 
- 
-
-    private void CalculateTargetPosition() 
-
-    { 
-
-        if (xInput == 1f) 
-
-        { 
-
-            targetPosition = (Vector2)transform.position + Vector2.right; 
-
-        } 
-
-        else if (xInput == -1f) 
-
-        { 
-
-            targetPosition = (Vector2)transform.position + Vector2.left; 
-
-        } 
-
-        else if (yInput == 1f) 
-
-        { 
-
-            targetPosition = (Vector2)transform.position + Vector2.up; 
-
-        } 
-
-        else if (yInput == -1f) 
-
-        { 
-
-            targetPosition = (Vector2)transform.position + Vector2.down; 
-
-        } 
-
-    } 
-
- 
- 
-
-    private void OnDrawGizmos() 
-
-    { 
-
-        Gizmos.DrawWireSphere(targetPosition, 0.15f); 
-
-    } 
-
-} 
+private bool CanMoveToTargetPosition()
+    {
+        return !Physics2D.OverlapCircle(targetPosition, 0.20f);
+    }
 ```
  
